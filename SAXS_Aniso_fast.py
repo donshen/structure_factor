@@ -110,7 +110,7 @@ if __name__ == "__main__":
     pdb_files = [f for f in os.listdir(args.data_path) if f[-4:] == '.pdb']
 
     for file in tqdm(pdb_files, desc=f"Computing structure factors for each frame..."):
-        read_file = open(os.path.join('./test', file), 'r')
+        read_file = open(os.path.join(args.data_path, file), 'r')
         atom_list, coords = [], []        
 
         # Read input
