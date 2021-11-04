@@ -9,12 +9,34 @@ from tqdm import tqdm
 parser = argparse.ArgumentParser(description='Compute X-ray scattering structure factor for anisotropic systems')
 
 parser.add_argument('-q','--qmax',
-                    help ='max q in A^-1',
+                    help='max q in A^-1',
                     type=float)
 
 parser.add_argument('-b','--bin_size',
-                    help ='bin width in A',
+                    help='bin width in A',
                     type=float)
+parser.add_argument('-d','--data_path',
+                    help='the path to read pdb files and save output data',
+                    type=str)
+
+def form_factor(q_abs, atom_type):
+    ff_a = {'O': np.array([[3.0485, 2.2868, 1.5463, 0.867]]),
+            'H': np.array([[0.489918, 0.262003, 0.196767, 0.049879]]),
+            'C': np.array([[2.31, 1.02, 1.5886, 0.865]]),
+           }
+    ff_b = {'O': np.array([[13.2771, 5.7011, 0.3239, 32.9089]]),
+            'H': np.array([[20.6593, 7.74039, 49.5519, 2.20159]]),
+            'C': np.array([[20.8439, 10.2075, 0.5687, 51.6512]]),
+           }
+    ff_c = {'O': 0.2508, 'H': 0.001305, 'C': 0.2156}
+
+    try:
+        q_abs = q_abs.reshape((1, q_abs.shape[0]))
+        term1 = ff_a[atom_type]
+        term2 = np.exp(np.matmul(((q_abs / 4 / np.pi) ** 2).T, -ff_b[atom_type]))
+        return np.dot(term2, term1.T) + ff_c[atom_type]
+    except KeyError:
+        raise ValueError("unknown atom type!")
 
 def form_factor_coeffs(atom_type):
     ff_a = {'O': np.array([3.0485, 2.2868, 1.5463, 0.867], dtype=np.float32),
@@ -77,7 +99,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     q_max = args.qmax
 
-    pdb_files = [f for f in os.listdir('./test') if f[-4:] == '.pdb']
+    pdb_files = [f for f in os.listdir(args.data_path) if f[-4:] == '.pdb']
 
     for file in tqdm(pdb_files, desc=f"Computing structure factors for each frame..."):
         read_file = open(os.path.join('./test', file), 'r')
@@ -133,13 +155,13 @@ if __name__ == "__main__":
             Sq_avg_list[bin_ndx] += Sq
             bin_num_list[bin_ndx] += 1
         # Output results
-        output = open(os.path.join('./test/', f'Sq-{file}.dat'), 'w')
+        output = open(os.path.join(args.data_path, f'Sq-{file}.dat'), 'w')
         output.write('# q [A^-1] Sq ndx_x-ndx_y-ndx_z\n')
         for i in range(len(q_abs)):
             output.write('%7.4f %8.3f %s\n' % (q_abs[i], Sq_list[i], ndx_list_str[i]))
         output.close()
         # Output averaged results
-        output = open(os.path.join('./test', f'Sq-avg-{file}.dat'), 'w')
+        output = open(os.path.join(args.data_path, f'Sq-avg-{file}.dat'), 'w')
         output.write('# q [A^-1] Sq\n')
         for i in range(len(bin_num_list)):
             if bin_num_list[i] > 0:
