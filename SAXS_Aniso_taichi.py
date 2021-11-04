@@ -16,27 +16,6 @@ parser.add_argument('-b','--bin_size',
                     help ='bin width in A',
                     type=float)
 
-
-def form_factor(q_abs, atom_type):
-    ff_a = {'O': np.array([[3.0485, 2.2868, 1.5463, 0.867]]),
-            'H': np.array([[0.489918, 0.262003, 0.196767, 0.049879]]),
-            'C': np.array([[2.31, 1.02, 1.5886, 0.865]]),
-           }
-    ff_b = {'O': np.array([[13.2771, 5.7011, 0.3239, 32.9089]]),
-            'H': np.array([[20.6593, 7.74039, 49.5519, 2.20159]]),
-            'C': np.array([[20.8439, 10.2075, 0.5687, 51.6512]]),
-           }
-    ff_c = {'O': 0.2508, 'H': 0.001305, 'C': 0.2156}
-
-    try:
-#         return np.sum(ff_a[atom] * np.exp(-ff_b[atom]*(q_abs/4/np.pi)**2)) + ff_c[atom]
-        q_abs = q_abs.reshape((1, q_abs.shape[0]))
-        term1 = ff_a[atom_type]
-        term2 = np.exp(np.matmul(((q_abs / 4 / np.pi) ** 2).T, -ff_b[atom_type]))
-        return np.dot(term2, term1.T) + ff_c[atom_type]
-    except KeyError:
-        raise ValueError("unknown atom type!")
-
 def form_factor_coeffs(atom_type):
     ff_a = {'O': np.array([3.0485, 2.2868, 1.5463, 0.867], dtype=np.float32),
             'H': np.array([0.489918, 0.262003, 0.196767, 0.049879], dtype=np.float32),
