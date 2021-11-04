@@ -107,7 +107,7 @@ if __name__ == "__main__":
     pdb_files = [f for f in os.listdir('./test') if f[-4:] == '.pdb']
 
     for file in tqdm(pdb_files, desc=f"Computing structure factors for each frame..."):
-        read_file = open(file, 'r')
+        read_file = open(os.path.join('./test', file), 'r')
         atom_list, coords = [], []        
 
         # Read input
@@ -164,14 +164,14 @@ if __name__ == "__main__":
             bin_num_list[bin_ndx] += 1
 
         # Output results
-        output = open('Sq-%s.dat' % file, 'w')
+        output = open(os.path.join('./test/', f'Sq-{file}.dat'), 'w')
         output.write('# q [A^-1] Sq ndx_x-ndx_y-ndx_z\n')
         for i in range(len(q_abs)):
             output.write('%7.4f %8.3f %s\n' % (q_abs[i], Sq_list[i], ndx_list_str[i]))
         output.close()
 
         # Output averaged results
-        output = open('Sq-avg-%s.dat' % file, 'w')
+        output = open(os.path.join('./test', f'Sq-avg-{file}.dat'), 'w')
         output.write('# q [A^-1] Sq\n')
         for i in range(len(bin_num_list)):
             if bin_num_list[i] > 0:
