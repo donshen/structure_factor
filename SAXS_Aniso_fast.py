@@ -104,7 +104,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     q_max = args.qmax
 
-    pdb_files = [f for f in os.listdir() if f[-4:] == '.pdb']
+    pdb_files = [f for f in os.listdir('./test') if f[-4:] == '.pdb']
 
     for file in tqdm(pdb_files, desc=f"Computing structure factors for each frame..."):
         read_file = open(file, 'r')
